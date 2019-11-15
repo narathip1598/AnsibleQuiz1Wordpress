@@ -1,0 +1,53 @@
+---
+- name: Install Wordpress
+  hosts: server
+  remote_user: root
+  vars:
+      ansible_password: redhat
+  tasks:
+    - name: Install Software
+      yum: 
+        name: "{{ packages }}"
+      vars: 
+        packages: 
+          - httpd
+          - mariadb
+          - mariadb-server
+          - php
+          - php-common
+          - php-mysql
+          - php-gd
+          - php-xml
+          - php-mbstring
+          - php-mcrypt
+          - php-xmlrpc
+          - unzip
+          - wget
+          - python-pip
+    - name: Start httpd
+      service:
+         name: httpd
+         state: started
+         enabled: true 
+    - name: Start mariadb
+      service:
+          name: mariadb
+          state: started
+          enabled: true  
+    - name: permanent and reload
+      firewalld:
+        service: http
+        permanent: true
+        state: enabled
+        immediate: true
+    - name: Mysql
+      pip: 
+        name: pymysql
+    - name: mysql password
+      mysql_user:
+        name: root
+        password: abc
+    - name: echo1
+      shell: echo "DELETE FROM mysql.user WHERE User=' ';" | mysql -uroot -p"abc"
+    - name: echo2
+      shell: echo "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost','127.0.0.1', '::1');" | mysql -uroot -p"abc"
